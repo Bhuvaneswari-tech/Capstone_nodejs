@@ -1,17 +1,45 @@
+// require('dotenv').config();
+// const request = require("supertest");
+// const app = require("../../app");
+// const mongoose = require("mongoose");
+
+// beforeAll(async () => {
+//   // connect mongoose BEFORE running tests
+//   await mongoose.connect(process.env.MONGO_URI_TEST);
+// });
+
+// // afterAll(async () => {
+// //   await mongoose.connection.db.dropDatabase();
+// //   await mongoose.disconnect();
+// // });
+
+// afterAll(async () => {
+//   const collections = Object.keys(mongoose.connection.collections);
+//   for (const collectionName of collections) {
+//     await mongoose.connection.collections[collectionName].deleteMany({});
+//   }
+//   await mongoose.disconnect();
+// });
+
 require('dotenv').config();
 const request = require("supertest");
 const app = require("../../app");
 const mongoose = require("mongoose");
 
+jest.setTimeout(30000); // <-- Increase timeout
+
 beforeAll(async () => {
-  // connect mongoose BEFORE running tests
   await mongoose.connect(process.env.MONGO_URI_TEST);
 });
 
 afterAll(async () => {
-  await mongoose.connection.db.dropDatabase();
+  const collections = Object.keys(mongoose.connection.collections);
+  for (const collectionName of collections) {
+    await mongoose.connection.collections[collectionName].deleteMany({});
+  }
   await mongoose.disconnect();
 });
+
 
 describe("Employee API", () => {
   let token;
