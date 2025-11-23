@@ -5,11 +5,9 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon --inspect app.js",
-  "test": "jest",
-  "test:unit": "jest tests/unit --runInBand",
-  "test:integration": "jest tests/integration",
-
-
+    "test": "jest",
+    "test:unit": "jest tests/unit --runInBand",
+    "test:integration": "jest tests/integration",
     "lint": "eslint ."
   },
   "keywords": [],
@@ -31,6 +29,7 @@
   },
   "devDependencies": {
     "jest": "^30.2.0",
+    "mongodb-memory-server": "^10.3.0",
     "nodemon": "^3.1.11",
     "supertest": "^7.1.4"
   }
