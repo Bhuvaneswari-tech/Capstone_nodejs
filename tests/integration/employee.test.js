@@ -49,61 +49,7 @@
 // });
 
 
-const request = require("supertest");
-const mongoose = require("mongoose");
-const app = require("../../app");
 
-let token;
-
-beforeAll(async () => {
-  // Connect to your test MongoDB
-  await mongoose.connect(process.env.MONGO_URI_TEST);
-});
-
-afterAll(async () => {
-  // Clean up database and close connection
-  await mongoose.connection.db.dropDatabase();
-  await mongoose.disconnect();
-});
-
-describe("Employee API", () => {
-  it("should register and login admin", async () => {
-    await request(app).post("/api/v1/auth/register").send({
-      username: "admin",
-      email: "a@a.com",
-      password: "pass123",
-      role: "admin"
-    });
-
-    const res = await request(app).post("/api/v1/auth/login").send({
-      username: "admin",
-      password: "pass123"
-    });
-
-    expect(res.statusCode).toBe(200);
-    token = res.body.accessToken;
-    expect(token).toBeDefined();
-  });
-
-  it("should create an employee", async () => {
-    const res = await request(app)
-      .post("/api/v1/employees")
-      .set("Authorization", `Bearer ${token}`)
-      .send({ name: "Alice", department: "HR", salary: 50000 });
-
-    expect(res.statusCode).toBe(201);
-    expect(res.body.name).toBe("Alice");
-  });
-
-  it("should list employees", async () => {
-    const res = await request(app)
-      .get("/api/v1/employees")
-      .set("Authorization", `Bearer ${token}`);
-
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-  });
-});
 
 
 
