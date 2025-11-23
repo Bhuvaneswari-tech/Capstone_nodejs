@@ -51,48 +51,46 @@
 
 const request = require("supertest");
 const mongoose = require("mongoose");
-const { MongoMemoryServer } = require("mongodb-memory-server");
 const app = require("../../app");
 
-jest.setTimeout(30000); // increase timeout for slow startup
-
-let mongoServer;
+let token;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-  await mongoose.connect(uri); // connect to in-memory MongoDB
+  // Connect to your test MongoDB
+  await mongoose.connect(process.env.MONGO_URI_TEST);
 });
 
 afterAll(async () => {
-  await mongoose.connection.dropDatabase();
-  await mongoose.connection.close();
-  await mongoServer.stop();
+  // Clean up database and close connection
+  await mongoose.connection.db.dropDatabase();
+  await mongoose.disconnect();
 });
 
 describe("Employee API", () => {
-  let token;
-
   it("should register and login admin", async () => {
-    await request(app)
-      .post("/api/v1/auth/register")
-      .send({ username: "admin", email: "a@a.com", password: "pass123", role: "admin" });
-    
-    const res = await request(app)
-      .post("/api/v1/auth/login")
-      .send({ username: "admin", password: "pass123" });
-    
+    await request(app).post("/api/v1/auth/register").send({
+      username: "admin",
+      email: "a@a.com",
+      password: "pass123",
+      role: "admin"
+    });
+
+    const res = await request(app).post("/api/v1/auth/login").send({
+      username: "admin",
+      password: "pass123"
+    });
+
     expect(res.statusCode).toBe(200);
     token = res.body.accessToken;
     expect(token).toBeDefined();
   });
 
-  it("should create employee", async () => {
+  it("should create an employee", async () => {
     const res = await request(app)
       .post("/api/v1/employees")
       .set("Authorization", `Bearer ${token}`)
       .send({ name: "Alice", department: "HR", salary: 50000 });
-    
+
     expect(res.statusCode).toBe(201);
     expect(res.body.name).toBe("Alice");
   });
@@ -101,9 +99,11 @@ describe("Employee API", () => {
     const res = await request(app)
       .get("/api/v1/employees")
       .set("Authorization", `Bearer ${token}`);
-    
+
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 });
+
+
 
