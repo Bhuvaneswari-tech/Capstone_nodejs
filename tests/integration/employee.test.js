@@ -28,9 +28,18 @@ const mongoose = require("mongoose");
 
 jest.setTimeout(30000); // <-- Increase timeout
 
+// beforeAll(async () => {
+//   await mongoose.connect(process.env.MONGO_URI_TEST);
+// });
+
 beforeAll(async () => {
-  await mongoose.connect(process.env.MONGO_URI_TEST);
+  await mongoose.connect(process.env.MONGO_URI_TEST, {
+    serverSelectionTimeoutMS: 20000,
+    connectTimeoutMS: 20000,
+  });
 });
+
+
 
 afterAll(async () => {
   const collections = Object.keys(mongoose.connection.collections);
