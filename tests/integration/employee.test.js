@@ -61,19 +61,19 @@ let mongoServer;
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
-  await mongoose.connect(uri); // no options needed
+  await mongoose.connect(uri); // connect to in-memory MongoDB
 });
 
 afterAll(async () => {
   await mongoose.connection.dropDatabase();
   await mongoose.connection.close();
-  await mongoServer.stop(); // stop in-memory server
+  await mongoServer.stop();
 });
 
 describe("Employee API", () => {
   let token;
 
-  test("register + login", async () => {
+  it("should register and login admin", async () => {
     await request(app)
       .post("/api/v1/auth/register")
       .send({ username: "admin", email: "a@a.com", password: "pass123", role: "admin" });
@@ -84,10 +84,10 @@ describe("Employee API", () => {
     
     expect(res.statusCode).toBe(200);
     token = res.body.accessToken;
-    expect(token).toBeTruthy();
+    expect(token).toBeDefined();
   });
 
-  test("create employee (admin)", async () => {
+  it("should create employee", async () => {
     const res = await request(app)
       .post("/api/v1/employees")
       .set("Authorization", `Bearer ${token}`)
@@ -97,7 +97,7 @@ describe("Employee API", () => {
     expect(res.body.name).toBe("Alice");
   });
 
-  test("list employees", async () => {
+  it("should list employees", async () => {
     const res = await request(app)
       .get("/api/v1/employees")
       .set("Authorization", `Bearer ${token}`);
@@ -106,3 +106,4 @@ describe("Employee API", () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 });
+
